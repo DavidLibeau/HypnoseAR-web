@@ -12,6 +12,10 @@ if(isset($_GET["id"]) && $_GET["id"]!=""){
     header("Location: index.php?error=Unknownseance");
 }
 
+$xml=simplexml_load_string(file_get_contents("./db/seance-".$seanceId.".xml", FILE_USE_INCLUDE_PATH));
+$xml["isStarted"]="true";
+$xml->saveXML("./db/seance-".$seanceId.".xml");
+
 ?>
 
 

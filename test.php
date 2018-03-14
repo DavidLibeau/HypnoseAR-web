@@ -16,5 +16,19 @@ print_r("<pre>".$myXMLData."</pre>");
 
 $xml=simplexml_load_string($myXMLData) or die("Error: Cannot create object");
 print_r($xml);*/
-print_r("Connecté");
+//print_r("Connecté");
+
+if(isset($_GET["id"]) && $_GET["id"]!=""){
+    $seanceId=$_GET["id"];
+} elseif(isset($_COOKIE["seanceId"]) && $_COOKIE["seanceId"]!=""){
+    $seanceId=$_COOKIE["seanceId"];
+} else {
+    header("Location: index.php?error=Unknownseance");
+}
+
+$xml=simplexml_load_string(file_get_contents("./db/seance-".$seanceId.".xml", FILE_USE_INCLUDE_PATH));
+$xml["isStarted"]="true";
+$xml->saveXML("./db/seance-".$seanceId.".xml");
+$xml=simplexml_load_string(file_get_contents("./db/seance-".$seanceId.".xml", FILE_USE_INCLUDE_PATH));
+echo($xml->asXML());
 ?>
