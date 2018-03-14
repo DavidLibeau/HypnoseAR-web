@@ -117,8 +117,7 @@ if(isset($_GET["id"]) && $_GET["id"]!=""){
                 </div>
             </div>
             <div id="tab-param">
-                <p>Mauris eleifend est et turpis. Duis id erat. Suspendisse potenti. Aliquam vulputate, pede vel vehicula accumsan, mi neque rutrum erat, eu congue orci lorem eget lorem. Vestibulum non ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce sodales. Quisque eu urna vel enim commodo pellentesque. Praesent eu risus hendrerit ligula tempus pretium. Curabitur lorem enim, pretium nec, feugiat nec, luctus a, lacus.</p>
-                <p>Duis cursus. Maecenas ligula eros, blandit nec, pharetra at, semper at, magna. Nullam ac lacus. Nulla facilisi. Praesent viverra justo vitae neque. Praesent blandit adipiscing velit. Suspendisse potenti. Donec mattis, pede vel pharetra blandit, magna ligula faucibus eros, id euismod lacus dolor eget odio. Nam scelerisque. Donec non libero sed nulla mattis commodo. Ut sagittis. Donec nisi lectus, feugiat porttitor, tempor ac, tempor vitae, pede. Aenean vehicula velit eu tellus interdum rutrum. Maecenas commodo. Pellentesque nec elit. Fusce in lacus. Vivamus a libero vitae lectus hendrerit hendrerit.</p>
+                <p></p>
             </div>
         </div>
 
@@ -126,23 +125,70 @@ if(isset($_GET["id"]) && $_GET["id"]!=""){
         <script type="text/javascript" src="//dav.li/jquery/2.1.4.js"></script>
         <script type="text/javascript" src="//dav.li/jquery/ui/jquery-ui.js"></script>
         <script>
+            function getCookie(q){
+                var cookietable = document.cookie.split(";");
+                for(var i=0; i<cookietable.length; i++){
+                   if(cookietable[i].replace(" ","").split("=")[0]==q){
+                        return cookietable[i].split("=")[1];
+                   }
+                }        
+            }
+            
+            function updateDb(newObject){
+                console.log(getCookie("seanceId"));
+                $.ajax({
+                    url: "getSeance.php"
+                }).done(function(data) {
+                    console.log(data);
+                    var xmlParser = new DOMParser();
+                    var xmlDOM = xmlParser.parseFromString(data, "text/xml");
+                    if(xmlDOM.documentElement.nodeName == "parsererror"){
+                        
+                    }else{
+                        xmlDOM.getElementsByTagName("scene")[0].append(xmlParser.parseFromString(newObject, "text/xml").documentElement);
+                        var xmlSerializer = new XMLSerializer();
+                        console.log(xmlSerializer.serializeToString(xmlDOM));
+                        $.ajax({
+                            url: "updateSeance.php?data="+xmlSerializer.serializeToString(xmlDOM)
+                        }).done(function(data) {
+                            console.log(data);
+                        });
+                    }
+                });
+            }
+            
             $(function() {
                 $("#tabs").tabs();
             });
             
-            var addedObjectId;
+            var addedObjectSceneId;
+            var addedObjectSelfId;
+            var holdObject=false;
             $(".addObject").click(function(){
                 $("#tabs").tabs("option", "active", 1);
-                $("#scene").append("<span class=\"object\" data-id=\""+$(this).data("id")+"\">"+$(this).data("name")+" #"+$(this).data("id")+"</span>");
-                addedObjectId=$(this).data("id");
+                do {
+                    addedObjectSceneId="o"+Math.floor(Math.random() * 9)+""+Math.floor(Math.random() * 9);
+                } while ($("#scene .object[data-sceneId=\""+addedObjectSceneId+"\"]").length != 0);
+                addedObjectSelfId=$(this).data("id");
+                
+                $("#scene").append("<span class=\"object\" data-selfId=\""+addedObjectSelfId+"\" data-sceneId=\""+addedObjectSceneId+"\">"+$(this).data("name")+" #"+$(this).data("id")+"</span>");
+                holdObject=true;
             });
             
             $( document ).mousemove(function( event ) {
-              $( "#scene .object[data-id=\""+addedObjectId+"\"]" ).position({
-                my: "left+3 bottom-3",
-                of: event,
-                collision: "fit"
-              });
+                if(holdObject){
+                    $( "#scene .object[data-sceneId=\""+addedObjectSceneId+"\"]" ).position({
+                        my: "left+3 bottom-3",
+                        of: event,
+                        collision: "fit"
+                    });
+                }
+            });
+            $("#scene").click(function(){
+                if(holdObject){
+                    holdObject=false;
+                }
+                updateDb("<object><selfId>"+addedObjectSelfId+"</selfId><sceneId>"+addedObjectSceneId+"</sceneId></object>");
             });
         </script>
     </body>
