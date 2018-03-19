@@ -129,7 +129,7 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
         <script type="text/javascript" src="//dav.li/jquery/2.1.4.js"></script>
         <script type="text/javascript" src="//dav.li/jquery/ui/jquery-ui.js"></script>
         <script>
-            function getCookie(q){
+            function getCookie(q){ //Retreive specific cookie
                 var cookietable = document.cookie.split(";");
                 for(var i=0; i<cookietable.length; i++){
                    if(cookietable[i].replace(" ","").split("=")[0]==q){
@@ -138,7 +138,7 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                 }        
             }
             
-            function updateDb(newObject){
+            function updateDb(newObject){ //Update database
                 console.log(getCookie("seanceId"));
                 $.ajax({
                     url: "getSeance.php"
@@ -161,14 +161,16 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                 });
             }
             
-            $(function() {
+            $(function() { //Jquery init tabs
                 $("#tabs").tabs();
             });
             
             var addedObjectSceneId;
             var addedObjectSelfId;
+            var addedObjectY;
+            var addedObjectX;
             var holdObject=false;
-            $(".addObject").click(function(){
+            $(".addObject").click(function(){ //An object is selected
                 $("#tabs").tabs("option", "active", 1);
                 do {
                     addedObjectSceneId="o"+Math.floor(Math.random() * 9)+""+Math.floor(Math.random() * 9);
@@ -182,17 +184,20 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
             $( document ).mousemove(function( event ) {
                 if(holdObject){
                     $( "#scene .object[data-sceneId=\""+addedObjectSceneId+"\"]" ).position({
-                        my: "left+3 bottom-3",
+                        my: "center bottom",
                         of: event,
+                        within: "#scene",
                         collision: "fit"
                     });
+                    addedObjectY=-1*Math.round(($( "#scene .object[data-sceneId=\""+addedObjectSceneId+"\"]" ).offset().top+$( "#scene .object[data-sceneId=\""+addedObjectSceneId+"\"]" ).height()/2)-($( "#user" ).offset().top+$( "#user" ).height()/2))/100;
+                    addedObjectX=Math.round(($( "#scene .object[data-sceneId=\""+addedObjectSceneId+"\"]" ).offset().left+$( "#scene .object[data-sceneId=\""+addedObjectSceneId+"\"]" ).width()/2)-($( "#user" ).offset().left+$( "#user" ).width()/2))/100;
                 }
             });
             $("#scene").click(function(){
                 if(holdObject){
                     holdObject=false;
                 }
-                updateDb("<object><selfId>"+addedObjectSelfId+"</selfId><sceneId>"+addedObjectSceneId+"</sceneId></object>");
+                updateDb("<object><selfId>"+addedObjectSelfId+"</selfId><sceneId>"+addedObjectSceneId+"</sceneId><position><x>"+addedObjectX+"</x><y>"+addedObjectY+"</y></position></object>");
             });
         </script>
     </body>
