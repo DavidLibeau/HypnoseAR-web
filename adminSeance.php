@@ -141,7 +141,7 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
             function updateDb(newObject){ //Update database
                 console.log(getCookie("seanceId"));
                 $.ajax({
-                    url: "getSeance.php"
+                    url: "getSeance.php?id="+getCookie("seanceId")
                 }).done(function(data) {
                     console.log(data);
                     var xmlParser = new DOMParser();
@@ -161,10 +161,34 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                 });
             }
             
-            $(function() { //Jquery init tabs
+            $(function() {
                 $("#tabs").tabs();
+                $("#tabs").tabs("option", "active", 1);
+                
+                setTimeout(function(){$.ajax({
+                    url: "getSeance.php?id="+getCookie("seanceId")
+                }).done(function(data) {
+                    console.log(data);
+                    var xmlParser = new DOMParser();
+                    var xmlDOM = xmlParser.parseFromString(data, "text/xml");
+                    if(xmlDOM.documentElement.nodeName == "parsererror"){
+
+                    }else{
+                        console.log(xmlDOM.getElementsByTagName("scene")[0].childNodes);
+                        xmlDOM.getElementsByTagName("scene")[0].childNodes.forEach(function(obj){
+                            var posY=$( "#scene").height()/2-(parseFloat(obj.querySelector("position>y").textContent)*100);
+                            console.log(parseFloat(obj.querySelector("position>x").textContent)*100);
+                            console.log("width:"+$( "#scene").width());
+                            console.log("width/2:"+$( "#scene").width()/2);
+                            var posX=$( "#scene").width()/2+(parseFloat(obj.querySelector("position>x").textContent)*100);
+                            console.log(posX);
+                            
+                            $("#scene").append("<span class=\"object\" data-selfId=\""+obj.getElementsByTagName("selfId")[0].textContent+"\" data-sceneId=\""+obj.getElementsByTagName("sceneId")[0].textContent+"\" style=\"position: relative; top: "+posY+"px; left: "+posX+"px;\">"+obj.getElementsByTagName("sceneId")[0].innerHTML+" #"+obj.getElementsByTagName("sceneId")[0].innerHTML+"</span>");
+                        });
+                    }
+                });},500);
             });
-            
+        
             var addedObjectSceneId;
             var addedObjectSelfId;
             var addedObjectY;
@@ -173,7 +197,7 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
             $(".addObject").click(function(){ //An object is selected
                 $("#tabs").tabs("option", "active", 1);
                 do {
-                    addedObjectSceneId="o"+Math.floor(Math.random() * 9)+""+Math.floor(Math.random() * 9);
+                    addedObjectSceneId=Math.floor(Math.random() * 9)+""+Math.floor(Math.random() * 9);
                 } while ($("#scene .object[data-sceneId=\""+addedObjectSceneId+"\"]").length != 0);
                 addedObjectSelfId=$(this).data("id");
                 
@@ -196,8 +220,8 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
             $("#scene").click(function(){
                 if(holdObject){
                     holdObject=false;
+                    updateDb("<object><selfId>"+addedObjectSelfId+"</selfId><sceneId>"+addedObjectSceneId+"</sceneId><position><x>"+addedObjectX+"</x><y>"+addedObjectY+"</y></position></object>");
                 }
-                updateDb("<object><selfId>"+addedObjectSelfId+"</selfId><sceneId>"+addedObjectSceneId+"</sceneId><position><x>"+addedObjectX+"</x><y>"+addedObjectY+"</y></position></object>");
             });
         </script>
     </body>

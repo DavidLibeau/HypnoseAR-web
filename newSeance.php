@@ -25,7 +25,7 @@ do {
    $id=randomId(); 
 } while(isSeanceExist($id));
 
-$xml=simplexml_load_string("<seance isSarted=\"false\"><id>".$id."</id><date_create>".time()."</date_create><scene></scene></seance>");
+$xml=simplexml_load_string("<seance isStarted=\"false\"><id>".$id."</id><date_create>".time()."</date_create><scene></scene></seance>");
 
 $xml->saveXML("./db/seance-".$id.".xml");
 
