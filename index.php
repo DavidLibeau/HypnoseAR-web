@@ -1,3 +1,4 @@
+<?php require("purgeDatabase.php"); ?>
 <!DOCTYPE html>
 
 <html lang="fr">
@@ -6,6 +7,12 @@
         <title>Hypnose AR</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <meta name="theme-color" content="#0070C0">
+        <style>
+            body{
+                background:#f4f4f4;
+                font-family: sans-serif;
+            }
+        </style>
     </head>
     <body>
         <h1>Hypnose AR</h1>
@@ -16,7 +23,7 @@
         
         <form action="joinSeance.php" method="get">
             <label>
-            Rejoindre scéance
+            Rejoindre une séance :
                 <input type="text" name="id" placeholder="id"/>
             </label>
             <input type="submit"/>

@@ -1,4 +1,5 @@
 <?php
+require("purgeDatabase.php");
 
 function isSeanceExist($id) {
     $filecontent=file_get_contents("./db/seance-".$id.".xml", FILE_USE_INCLUDE_PATH);
