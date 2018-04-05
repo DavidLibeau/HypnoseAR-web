@@ -38,8 +38,9 @@ $putcontent->query("//object")->each(function($i, $domnode) {
     $object=FluidXml($domnode);
     $objectId=$object->query("sceneId/text()");
 
-    if(count($simplexml->xpath("//object[sceneId=".$objectId."]"))<1){
+    if(count($simplexml->xpath("//object[sceneId=".$objectId."]"))>0){
         $modified=true;
+        $xml->remove("//object[sceneId=".$objectId."]");
         $xml->query("scene")->addChild($object);
     }
 });
