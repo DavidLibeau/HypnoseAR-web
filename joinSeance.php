@@ -25,7 +25,7 @@ function isSeanceStarted($id) {
     if($filecontent===false){
         return false;
     }else{
-        return true;   
+        return true;  //ajouter vérification isStarted="true" ou modifier le nom de la function 
     }
 }
 
@@ -49,6 +49,12 @@ if(!(isset($_GET["id"]) && $_GET["id"]!="" && isSeanceStarted($_GET["id"]))){
         <title>Hypnose AR</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <meta name="theme-color" content="#0070C0">
+        <style>
+            body{
+                background:#f4f4f4;
+                font-family: sans-serif;
+            }
+        </style>
     </head>
 
     <body>
