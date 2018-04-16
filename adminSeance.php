@@ -1,5 +1,16 @@
 <?php
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+require("lib/fluidxml-1.21/source/FluidXml.php");
+use \FluidXml\FluidXml;
+use \FluidXml\FluidNamespace;
+use function \FluidXml\fluidxml;
+use function \FluidXml\fluidns;
+use function \FluidXml\fluidify;
+
 // Interface recherche
 // Scene : Ajout d'objet en Ajax (bouton "Téléverser") avec vérification de l'XML local et XML distant (demande d'éraser si différence)
 
@@ -29,7 +40,7 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <meta name="theme-color" content="#0070C0">
         <link href="//dav.li/jquery/ui/jquery-ui.css" rel="stylesheet" />
-        <link rel="stylesheet" href="https://dav.li/forkawesome/1.0.11/css/fork-awesome.min.css"/>
+        <link rel="stylesheet" href="https://dav.li/forkawesome/1.0.11/css/fork-awesome.min.css" />
         <style>
             body {
                 background: #f4f4f4;
@@ -41,7 +52,6 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                 display: inline-block;
                 padding: 10px;
                 margin: 10px;
-                width: 300px;
                 background-color: #fafafa;
                 border-radius: 4px;
             }
@@ -54,6 +64,11 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                 margin: 10px 0;
                 height: 200px;
                 background-color: #f4f4f4;
+                text-align: center;
+                overflow: hidden;
+            }
+            #objects>span>div>img {
+                height: 200px;
             }
 
             #objects>span>footer>button {
@@ -65,7 +80,7 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                 height: 100vh;
                 background-color: #f4f4f4;
             }
-            
+
             #tab-scene>.refreshScene {
                 position: absolute;
                 top: 24px;
@@ -88,8 +103,8 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                 position: absolute;
                 cursor: pointer;
             }
-            
-            #scene>.object>header{
+
+            #scene>.object>header {
                 z-index: 1;
             }
 
@@ -104,13 +119,16 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                 min-width: 350px;
                 z-index: 9;
             }
+
             #scene>.object .ui-tabs-nav a {
                 font-size: 15px;
                 padding: 5px;
             }
+
             #scene>.object .ui-tabs-panel {
                 padding: 5px;
             }
+
             #scene>.object .ui-tabs-panel p {
                 margin: 5px;
             }
@@ -136,31 +154,25 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                 </form>
                 <div id="objects">
                     <?php
-                    $objectsxml=scandir("./db/3d/xml/");
-                    
-                    if($objectsxml!=false){
-                        foreach ($objectsxml as $objectxml){
-                            if(strlen($objectxml)>=3){
-                                $content=file_get_contents("./db/3d/xml/".$objectxml, FILE_USE_INCLUDE_PATH);
-                                if($content!=false){
-                                    $xml=simplexml_load_string($content);
-                                    if($xml!=false){ ?>
+                    $content=file_get_contents("./db/3d/downloadList.xml", FILE_USE_INCLUDE_PATH);
+                    if($content!=false){
+                        $xml=simplexml_load_string($content);
+                        $xml=FluidXml($xml);
+                        $xml->query("//object")->each(function($i, $DOMnode) {
+                            ?>
                         <span class="object">
-                                        <header>
-                                            <h3><?php echo($xml->name); ?></h3>
-                                        </header>
-                                        <div>
-
-                                        </div>
-                                        <footer>
-                                            <button class="addObject" data-id="<?php echo($xml->id); ?>" data-name="<?php echo($xml->name); ?>">Ajouter</button>
-                                        </footer>
-                                    </span>
+                            <header>
+                                <h3><?php echo($this->query("name/text()")); ?></h3>
+                            </header>
+                            <div>
+                                <img src="db/3d/thumbnail/<?php echo($this->query("id/text()")); ?>_thumbnail.png" alt="Thumbnail"/>
+                            </div>
+                            <footer>
+                                <button class="addObject" data-id="<?php echo($this->query("id/text()")); ?>" data-name="<?php echo($this->query("name/text()")); ?>">Ajouter</button>
+                            </footer>
+                        </span>
                         <?php
-                                    }
-                                }
-                            }
-                        }
+                        });
                     } ?>
                 </div>
             </div>
@@ -195,6 +207,7 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                     console.log(data);
                     var xmlParser = new DOMParser();
                     var xmlDOM = xmlParser.parseFromString(data, "text/xml");
+                    
                     if (xmlDOM.documentElement.nodeName == "parsererror") {
 
                     } else {
@@ -211,8 +224,8 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
 
                                 $("#scene>span[data-sceneId=\"" + sceneId + "\"]").remove();
                                 $("#scene").append("<span class=\"object\" data-selfId=\"" + selfId + "\" data-sceneId=\"" + sceneId + "\" style=\"top: " + posY + "px; left: " + posX + "px;\">" +
-                                    "<header><i class=\"fa fa-caret-right\" aria-hidden=\"true\"></i> Objet #" + sceneId + "</header>" +
-                                    "<footer "+(parseFloat(obj.querySelector("position>x").textContent)<0 ? "" : "style=\"right:0\"")+"><div id=\"objectTab-" + sceneId + "\"><ul><li><a href=\"#objectTab-" + sceneId + "-position\">Position</a></li><li><a href=\"#objectTab-" + sceneId + "-rotation\">Rotation</a></li><li><a href=\"#objectTab-" + sceneId + "-scale\">Scale</a></li></ul>" +
+                                    "<header><i class=\"fa fa-caret-right\" aria-hidden=\"true\"></i> "+getNameOfObject(selfId)+" #" + sceneId + "</header>" +
+                                    "<footer " + (parseFloat(obj.querySelector("position>x").textContent) < 0 ? "" : "style=\"right:0\"") + "><div id=\"objectTab-" + sceneId + "\"><ul><li><a href=\"#objectTab-" + sceneId + "-position\">Position</a></li><li><a href=\"#objectTab-" + sceneId + "-rotation\">Rotation</a></li><li><a href=\"#objectTab-" + sceneId + "-scale\">Scale</a></li></ul>" +
                                     "<div id=\"objectTab-" + sceneId + "-position\"><p><label>X <input type=\"number\" name=\"posX\" value=\"" + obj.querySelector("position>x").textContent + "\"/></label></p><p><label>Y <input type=\"number\" name=\"posY\" value=\"" + obj.querySelector("position>y").textContent + "\"/></label></p><p><label>Z <input type=\"number\" name=\"posZ\" value=\"" + obj.querySelector("position>z").textContent + "\"/></label></p></form></div>" +
                                     "<div id=\"objectTab-" + sceneId + "-rotation\"><p><label>X <input type=\"number\" name=\"posX\" value=\"" + obj.querySelector("position>x").textContent + "\"/></label></p><p><label>Y <input type=\"number\" name=\"posY\" value=\"" + obj.querySelector("position>y").textContent + "\"/></label></p><p><label>Z <input type=\"number\" name=\"posZ\" value=\"" + obj.querySelector("position>z").textContent + "\"/></label></p></form></div>" +
                                     "<div id=\"objectTab-" + sceneId + "-scale\"><p><label>X <input type=\"number\" name=\"posX\" value=\"" + obj.querySelector("position>x").textContent + "\"/></label></p><p><label>Y <input type=\"number\" name=\"posY\" value=\"" + obj.querySelector("position>y").textContent + "\"/></label></p><p><label>Z <input type=\"number\" name=\"posZ\" value=\"" + obj.querySelector("position>z").textContent + "\"/></label></p></div>" +
@@ -230,9 +243,9 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                                     }).done(function(data) {
                                         console.log(data);
                                         $("#scene>.object[data-sceneId=\"" + sceneId + "\"] button.updateObject").text(data);
-                                        setTimeout(function(){
+                                        setTimeout(function() {
                                             $("#scene>.object[data-sceneId=\"" + sceneId + "\"] button.updateObject").text("Update object");
-                                        },5000);
+                                        }, 5000);
                                     }).fail(function(data) {
                                         console.log(data);
                                     });
@@ -252,17 +265,35 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                     }
                 });
             }
+            
+            var downloadList;
+            function getNameOfObject(id){
+                parser = new DOMParser();
+                var downloadListXml = parser.parseFromString(downloadList,"text/xml");
+                console.log(downloadListXml);
+                var it= downloadListXml.evaluate("//object[id="+id+"]/name/text()", downloadListXml, null, XPathResult.ANY_TYPE, null );
+                var names = [];
+                var node;
+                while (node = it.iterateNext()) {names.push(node);}
+                return names[0].textContent;
+            }
 
             $(function() {
                 $("#tabs").tabs();
                 $("#tabs").tabs("option", "active", 1);
+                
+                $.ajax({
+                    url: "downloadList.php"
+                }).done(function(data) {
+                    downloadList=data;
+                });
 
                 setTimeout(function() {
                     refreshScene();
                     //setInterval(refreshScene, 5000);
                 }, 500);
-                
-                $(".refreshScene").click(function(){
+
+                $(".refreshScene").click(function() {
                     refreshScene();
                     $(".refreshScene").text("Scene rafraîchie !");
                     setTimeout(function() {
@@ -290,7 +321,7 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
             $(document).mousemove(function(event) {
                 if (holdObject) {
                     $("#scene .object[data-sceneId=\"" + addedObjectSceneId + "\"]").position({
-                        my: "center bottom",
+                        my: "top left",
                         of: event,
                         within: "#scene",
                         collision: "fit"

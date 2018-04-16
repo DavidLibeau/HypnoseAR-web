@@ -10,7 +10,7 @@ use function \FluidXml\fluidxml;
 use function \FluidXml\fluidns;
 use function \FluidXml\fluidify;
 
-$xml=FluidXml("<downloadlist></downloadlist>");
+/*$xml=FluidXml("<downloadlist></downloadlist>");
 
 $files = scandir("./db/3d/xml");
 foreach($files as $file) {
@@ -24,6 +24,14 @@ foreach($files as $file) {
     }
 }
 
-echo($xml->xml());
+echo($xml->xml());*/
+
+$content=file_get_contents("./db/3d/downloadList.xml", FILE_USE_INCLUDE_PATH);
+
+if($content===false){
+    die("Error:404");
+}else{
+    echo($content);
+}
 
 ?>
