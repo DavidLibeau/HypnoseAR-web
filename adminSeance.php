@@ -297,6 +297,8 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                     }
                     if(results.length==0){
                         $("#noResult").show();
+                    }else{
+                        $("#noResult").hide();
                     }
                     return results;
                 }
