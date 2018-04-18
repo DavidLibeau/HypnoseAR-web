@@ -48,7 +48,7 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                 overflow-x: hidden;
             }
 
-            #objects>span {
+            #objectSearchResult>span {
                 display: inline-block;
                 padding: 10px;
                 margin: 10px;
@@ -56,22 +56,22 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                 border-radius: 4px;
             }
 
-            #objects>span>header>h3 {
+            #objeobjectSearchResultcts>span>header>h3 {
                 margin: 10px 0;
             }
 
-            #objects>span>div {
+            #objectSearchResult>span>div {
                 margin: 10px 0;
                 height: 200px;
                 background-color: #f4f4f4;
                 text-align: center;
                 overflow: hidden;
             }
-            #objects>span>div>img {
+            #objectSearchResult>span>div>img {
                 height: 200px;
             }
 
-            #objects>span>footer>button {
+            #objectSearchResult>span>footer>button {
                 float: right;
             }
 
@@ -148,11 +148,11 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                 <li><a href="#tab-param">Paramètres</a></li>
             </ul>
             <div id="tab-objects">
-                <form>
-                    <input type="text" placeholder="Recherche" disabled/>
-                    <input type="submit" disabled/>
+                <form id="searchObject">
+                    <input type="text" placeholder="Recherche"/>
+                    <input type="submit"/>
                 </form>
-                <div id="objects">
+                <div id="objectSearchResult">
                     <?php
                     $content=file_get_contents("./db/3d/downloadList.xml", FILE_USE_INCLUDE_PATH);
                     if($content!=false){
@@ -160,7 +160,7 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                         $xml=FluidXml($xml);
                         $xml->query("//object")->each(function($i, $DOMnode) {
                             ?>
-                        <span class="object">
+                        <span class="object" data-id="<?php echo($this->query("id/text()")); ?>">
                             <header>
                                 <h3><?php echo($this->query("name/text()")); ?></h3>
                             </header>
@@ -174,6 +174,7 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                         <?php
                         });
                     } ?>
+                    <p id="noResult" style="display:none">Aucun résultat.</p>
                 </div>
             </div>
             <div id="tab-scene">
@@ -211,7 +212,7 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                     if (xmlDOM.documentElement.nodeName == "parsererror") {
 
                     } else {
-                        console.log(xmlDOM.getElementsByTagName("scene")[0].childNodes);
+                        //console.log(xmlDOM.getElementsByTagName("scene")[0].childNodes);
                         xmlDOM.getElementsByTagName("scene")[0].childNodes.forEach(function(obj) {
                             if (obj.nodeType == Node.ELEMENT_NODE) {
                                 console.log(obj);
@@ -277,6 +278,29 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                 while (node = it.iterateNext()) {names.push(node);}
                 return names[0].textContent;
             }
+            function searchObject(q){
+                if(q==""){
+                    $("#objectSearchResult .object").show();
+                }else{
+                    $("#objectSearchResult .object").hide();
+                    console.log(q);
+                    parser = new DOMParser();
+                    var downloadListXml = parser.parseFromString(downloadList,"text/xml");
+                    console.log(downloadListXml);
+                    var it= downloadListXml.evaluate("//object[contains(translate(name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),translate('"+q+"', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')) or contains(translate(keywords//keyword, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),translate('"+q+"', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))]/id/text()", downloadListXml, null, XPathResult.ANY_TYPE, null );
+                    console.log(it);
+                    var results = [];
+                    var node;
+                    while (node = it.iterateNext()) {
+                        $("#objectSearchResult .object[data-id=\""+node.textContent+"\"]").show();
+                        results.push(node.textContent);
+                    }
+                    if(results.length==0){
+                        $("#noResult").show();
+                    }
+                    return results;
+                }
+            }
 
             $(function() {
                 $("#tabs").tabs();
@@ -299,6 +323,13 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                     setTimeout(function() {
                         $(".refreshScene").text("Rafraîchir la Scene");
                     }, 1500);
+                });
+                
+                $("#searchObject").on("submit keypress",function(evt){
+                    if(evt.type=="submit"){
+                        evt.preventDefault();
+                    }
+                    console.log(searchObject($(this).children("input").val()));
                 });
             });
 
