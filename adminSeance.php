@@ -222,22 +222,42 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                                 var posY = $("#scene").height() / 2 - (parseFloat(obj.querySelector("position>y").textContent) * 100);
                                 //console.log(parseFloat(obj.querySelector("position>x").textContent) * 100);
                                 var posX = $("#scene").width() / 2 + (parseFloat(obj.querySelector("position>x").textContent) * 100);
+                                
+                                var posParam=(obj.querySelector("position") ? "<div id=\"objectTab-" + sceneId + "-position\"><p><label>X <input type=\"number\" name=\"posX\" value=\"" + obj.querySelector("position>x").textContent + "\"/></label></p><p><label>Y <input type=\"number\" name=\"posY\" value=\"" + obj.querySelector("position>y").textContent + "\"/></label></p><p><label>Z <input type=\"number\" name=\"posZ\" value=\"" + obj.querySelector("position>z").textContent + "\"/></label></p></form></div>" : "<div id=\"objectTab-" + sceneId + "-position\"><p>NaN</p></div>");
+                                
+                                var rotParam=(obj.querySelector("rotation") ? "<div id=\"objectTab-" + sceneId + "-rotation\"><p><label>X <input type=\"number\" name=\"rotX\" value=\"" + obj.querySelector("rotation>x").textContent + "\"/></label></p><p><label>Y <input type=\"number\" name=\"rotY\" value=\"" + obj.querySelector("rotation>y").textContent + "\"/></label></p><p><label>Z <input type=\"number\" name=\"rotZ\" value=\"" + obj.querySelector("rotation>z").textContent + "\"/></label></p></form></div>" : "<div id=\"objectTab-" + sceneId + "-rotation\"><p>NaN</p></div>");
+                                
+                                var scaleParam=(obj.querySelector("scale") ? "<div id=\"objectTab-" + sceneId + "-scale\"><p><label>X <input type=\"number\" name=\"scaleX\" value=\"" + obj.querySelector("scale>x").textContent + "\"/></label></p><p><label>Y <input type=\"number\" name=\"scaleY\" value=\"" + obj.querySelector("scale>y").textContent + "\"/></label></p><p><label>Z <input type=\"number\" name=\"scaleZ\" value=\"" + obj.querySelector("scale>z").textContent + "\"/></label></p></div>" : "<div id=\"objectTab-" + sceneId + "-scale\"><p>NaN</p></div>");
 
+                                console.log(obj.querySelector("rotation"));
                                 $("#scene>span[data-sceneId=\"" + sceneId + "\"]").remove();
                                 $("#scene").append("<span class=\"object\" data-selfId=\"" + selfId + "\" data-sceneId=\"" + sceneId + "\" style=\"top: " + posY + "px; left: " + posX + "px;\">" +
                                     "<header><i class=\"fa fa-caret-right\" aria-hidden=\"true\"></i> "+getNameOfObject(selfId)+" #" + sceneId + "</header>" +
                                     "<footer " + (parseFloat(obj.querySelector("position>x").textContent) < 0 ? "" : "style=\"right:0\"") + "><div id=\"objectTab-" + sceneId + "\"><ul><li><a href=\"#objectTab-" + sceneId + "-position\">Position</a></li><li><a href=\"#objectTab-" + sceneId + "-rotation\">Rotation</a></li><li><a href=\"#objectTab-" + sceneId + "-scale\">Scale</a></li></ul>" +
-                                    "<div id=\"objectTab-" + sceneId + "-position\"><p><label>X <input type=\"number\" name=\"posX\" value=\"" + obj.querySelector("position>x").textContent + "\"/></label></p><p><label>Y <input type=\"number\" name=\"posY\" value=\"" + obj.querySelector("position>y").textContent + "\"/></label></p><p><label>Z <input type=\"number\" name=\"posZ\" value=\"" + obj.querySelector("position>z").textContent + "\"/></label></p></form></div>" +
-                                    "<div id=\"objectTab-" + sceneId + "-rotation\"><p><label>X <input type=\"number\" name=\"posX\" value=\"" + obj.querySelector("position>x").textContent + "\"/></label></p><p><label>Y <input type=\"number\" name=\"posY\" value=\"" + obj.querySelector("position>y").textContent + "\"/></label></p><p><label>Z <input type=\"number\" name=\"posZ\" value=\"" + obj.querySelector("position>z").textContent + "\"/></label></p></form></div>" +
-                                    "<div id=\"objectTab-" + sceneId + "-scale\"><p><label>X <input type=\"number\" name=\"posX\" value=\"" + obj.querySelector("position>x").textContent + "\"/></label></p><p><label>Y <input type=\"number\" name=\"posY\" value=\"" + obj.querySelector("position>y").textContent + "\"/></label></p><p><label>Z <input type=\"number\" name=\"posZ\" value=\"" + obj.querySelector("position>z").textContent + "\"/></label></p></div>" +
+                                     posParam + rotParam + scaleParam +
                                     "<button class=\"updateObject\">Mettre à jour l'objet</button></footer</span>");
 
                                 $("#objectTab-" + sceneId).tabs();
                                 $("#scene>.object[data-sceneId=\"" + sceneId + "\"] button.updateObject").click(function() {
+                                    var objectXml = "<object><selfId>" + selfId + "</selfId><sceneId>" + sceneId + "</sceneId>";
                                     var posX = $("#scene>.object[data-sceneId=\"" + sceneId + "\"] [name=\"posX\"]").val();
                                     var posY = $("#scene>.object[data-sceneId=\"" + sceneId + "\"] [name=\"posY\"]").val();
                                     var posZ = $("#scene>.object[data-sceneId=\"" + sceneId + "\"] [name=\"posZ\"]").val();
-                                    var objectXml = "<object><selfId>" + selfId + "</selfId><sceneId>" + sceneId + "</sceneId><position><x>" + posX + "</x><y>" + posY + "</y><z>" + posZ + "</z></position></object>";
+                                    objectXml += "<position><x>" + posX + "</x><y>" + posY + "</y><z>" + posZ + "</z></position>";
+                                    if(obj.querySelector("rotation")!=null){
+                                        var rotX = $("#scene>.object[data-sceneId=\"" + sceneId + "\"] [name=\"rotX\"]").val();
+                                        var rotY = $("#scene>.object[data-sceneId=\"" + sceneId + "\"] [name=\"rotY\"]").val();
+                                        var rotZ = $("#scene>.object[data-sceneId=\"" + sceneId + "\"] [name=\"rotZ\"]").val();
+                                        objectXml += "<rotation><x>" + rotX + "</x><y>" + rotY + "</y><z>" + rotZ + "</z></rotation>";
+                                    }
+                                    if(obj.querySelector("scale")!=null){
+                                        var scaleX = $("#scene>.object[data-sceneId=\"" + sceneId + "\"] [name=\"scaleX\"]").val();
+                                        var scaleY = $("#scene>.object[data-sceneId=\"" + sceneId + "\"] [name=\"scaleY\"]").val();
+                                        var scaleZ = $("#scene>.object[data-sceneId=\"" + sceneId + "\"] [name=\"scaleZ\"]").val();
+                                        objectXml += "<scale><x>" + scaleX + "</x><y>" + scaleY + "</y><z>" + scaleZ + "</z></scale>";
+                                    }
+                                    objectXml += "</object>";
+
                                     console.log(objectXml);
                                     $.ajax({
                                         url: "updateObject.php?seanceId=" + getCookie("seanceId") + "&data=" + objectXml
