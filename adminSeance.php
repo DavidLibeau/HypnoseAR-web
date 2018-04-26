@@ -408,7 +408,7 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
 
             $("#switchMode").click(function() {
                 $.ajax({
-                    url: "updateMode.php?seanceId=" + getCookie("seanceId") + "&data=<mode>true</mode>"
+                    url: "updateMode.php?seanceId=" + getCookie("seanceId") + "&data=<mode>"+($("#switchMode>em").text()==="true" ? "false" : "true")+"</mode>"
                 }).done(function(data) {
                     refreshScene();
                     $("#tabs").tabs("option", "active", 1);
