@@ -390,8 +390,9 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
                         within: "#scene",
                         collision: "fit"
                     });
-                    addedObjectY = -1 * Math.round(($("#scene .object[data-sceneId=\"" + addedObjectSceneId + "\"]").offset().top + $("#scene .object[data-sceneId=\"" + addedObjectSceneId + "\"]").height() / 2) - ($("#user").offset().top + $("#user").height() / 2)) / 100;
-                    addedObjectX = Math.round(($("#scene .object[data-sceneId=\"" + addedObjectSceneId + "\"]").offset().left + $("#scene .object[data-sceneId=\"" + addedObjectSceneId + "\"]").width() / 2) - ($("#user").offset().left + $("#user").width() / 2)) / 100;
+                    addedObjectY = -1 * Math.round($("#scene .object[data-sceneId=\"" + addedObjectSceneId + "\"]").offset().top - ($("#user").offset().top + $("#user").height() / 2)) / 100;
+                    addedObjectX = Math.round($("#scene .object[data-sceneId=\"" + addedObjectSceneId + "\"]").offset().left - ($("#user").offset().left + $("#user").width() / 2)) / 100;
+                    console.log(addedObjectY+" "+addedObjectX);
                 }
             });
             $("#scene").click(function() {
