@@ -385,7 +385,7 @@ $xml->saveXML("./db/seance-".$seanceId.".xml");
             $(document).mousemove(function(event) {
                 if (holdObject) {
                     $("#scene .object[data-sceneId=\"" + addedObjectSceneId + "\"]").position({
-                        my: "top left",
+                        my: "left top",
                         of: event,
                         within: "#scene",
                         collision: "fit"
